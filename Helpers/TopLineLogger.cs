@@ -8,12 +8,21 @@ namespace Dlt.Holiday.Sync.Helpers
     public static class TopLineLogger
     {
         private static readonly object LockObject = new object();
+        private static string _logPrefix = "default";
+        private static string _baseDirectory;
         private static string _logFilePath;
+        private static int _currentMonth;
         private static bool _debugMode = true;
 
-        public static void Initialize(string baseDirectory)
+        public static void Initialize(string baseDirectory, string logPrefix = null)
         {
-            _logFilePath = Path.Combine(baseDirectory, "sync_event.log");
+            _baseDirectory = baseDirectory;
+            if (!string.IsNullOrWhiteSpace(logPrefix))
+                _logPrefix = logPrefix;
+
+            var now = DateTime.Now;
+            _currentMonth = now.Month;
+            _logFilePath = ResolveLogFilePath(now);
         }
 
         public static void Log(LogLevel level, string message)
@@ -27,6 +36,7 @@ namespace Dlt.Holiday.Sync.Helpers
                 try
                 {
                     EnsureInitialized();
+                    EnsureMonthlyLogFile();
 
                     string existingContent = string.Empty;
                     if (File.Exists(_logFilePath))
@@ -115,13 +125,30 @@ namespace Dlt.Holiday.Sync.Helpers
             }
         }
 
+        private static string ResolveLogFilePath(DateTime date)
+        {
+            return Path.Combine(_baseDirectory,
+                string.Format("sync_log-{0}-{1:D4}-{2:D2}.log",
+                    _logPrefix, date.Year, date.Month));
+        }
+
+        private static void EnsureMonthlyLogFile()
+        {
+            var now = DateTime.Now;
+            if (now.Month != _currentMonth)
+            {
+                _currentMonth = now.Month;
+                _logFilePath = ResolveLogFilePath(now);
+            }
+        }
+
         private static void EnsureInitialized()
         {
             if (string.IsNullOrEmpty(_logFilePath))
             {
-                _logFilePath = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "sync_event.log");
+                _baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                _currentMonth = DateTime.Now.Month;
+                _logFilePath = ResolveLogFilePath(DateTime.Now);
             }
         }
     }
