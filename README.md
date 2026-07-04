@@ -27,18 +27,31 @@ HolidaySync/
 ├── App.config                  # Runtime binding redirects + TLS AppContext switches
 ├── edriving.ini                # Configuration (server, database, API auth)
 ├── Program.cs                  # Entry point
+├── .gitignore
+├── docs/
+│   └── GITHUB.md               # Git workflow & rules
 ├── Models/
 │   └── Holiday.cs              # DTO: HolidayDto, PaginatedApiResponse<T>, LoginResponse
 └── Helpers/
     ├── IniParser.cs             # INI file reader (sections, comments, quoted values)
-    ├── TopLineLogger.cs         # Thread-safe logger (newest entry first, colored console)
+    ├── TopLineLogger.cs         # Thread-safe logger (monthly rotation, colored console)
     ├── CurlHelper.cs            # HTTP via curl.exe (HEAD, GET, POST JSON)
     └── SyncEngine.cs            # Main sync logic
 ```
 
 ## Log Format
 
-Logs write to `sync_log-{SERVER_NAME}-{yyyy-MM}.log` (newest entry first) with automatic monthly rotation, and to console with colors:
+Log files follow the naming pattern `sync_log-{SERVER_NAME}-{yyyy-MM}.log` and write newest entry first. The `{SERVER_NAME}` is read from `[SERVER_INFO]` in `edriving.ini`.
+
+When the month rolls over, a new log file is created automatically — no manual rotation needed.
+
+Example filenames:
+
+```
+sync_log-holiday-2026-07.log
+sync_log-holidaycloud-2026-08.log
+sync_log-DLT-01-2026-07.log
+```
 
 ```
 [2026-07-04 12:51:54]🟢 SUCCESS > Loaded INI (DLT-01)
