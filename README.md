@@ -38,7 +38,7 @@ HolidaySync/
 
 ## Log Format
 
-Logs write to `sync_event.log` (newest entry first) and console with colors:
+Logs write to `sync_log-{SERVER_NAME}-{yyyy-MM}.log` (newest entry first) with automatic monthly rotation, and to console with colors:
 
 ```
 [2026-07-04 12:51:54]🟢 SUCCESS > Loaded INI (DLT-01)

@@ -17,9 +17,11 @@ namespace Dlt.Holiday.Sync
 
             var iniFilePath = ResolveIniFilePath(args);
 
+            var logPrefix = ResolveLogPrefix(iniFilePath);
+
             try
             {
-                TopLineLogger.Initialize(AppDomain.CurrentDomain.BaseDirectory);
+                TopLineLogger.Initialize(AppDomain.CurrentDomain.BaseDirectory, logPrefix);
 
                 var engine = new SyncEngine(iniFilePath);
                 engine.Run();
@@ -34,6 +36,22 @@ namespace Dlt.Holiday.Sync
                 Environment.Exit(1);
                 return 1;
             }
+        }
+
+        private static string ResolveLogPrefix(string iniFilePath)
+        {
+            try
+            {
+                var ini = new IniParser(iniFilePath);
+                var serverName = ini.GetValue("SERVER_INFO", "SERVER_NAME", null);
+                if (!string.IsNullOrWhiteSpace(serverName))
+                    return serverName;
+            }
+            catch
+            {
+            }
+
+            return Environment.MachineName;
         }
 
         private static string ResolveIniFilePath(string[] args)
